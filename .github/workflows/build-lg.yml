@@ -1,0 +1,28 @@
+name: Build LG
+on:
+  push:
+    paths:
+      - 'lg.zip'
+      - '.github/workflows/build-lg.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -q -o lg.zip -d src
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g @webosose/ares-cli
+      - run: |
+          mkdir out
+          ares-package src/TVLibre-LG/app --outdir out --no-minify
+          cp out/*.ipk TVLibre-LG.ipk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: lg-latest
+          name: TV Libre LG (última versión)
+          files: TVLibre-LG.ipk
