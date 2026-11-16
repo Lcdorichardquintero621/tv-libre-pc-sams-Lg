@@ -1,0 +1,29 @@
+name: Build PC
+on:
+  push:
+    paths:
+      - 'pc.zip'
+      - '.github/workflows/build-pc.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: Expand-Archive -Path pc.zip -DestinationPath src -Force
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - working-directory: src/TVLibre-PC
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          npm install
+          npx electron-builder --win portable --publish never
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pc-latest
+          name: TV Libre PC (última versión)
+          files: src/TVLibre-PC/dist/TVLibre-PC.exe
